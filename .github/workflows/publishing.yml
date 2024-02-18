@@ -15,11 +15,11 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
       - run: pip install tox
       - run: tox
         env:
-          TOXENV: 3.11
+          TOXENV: 3.12
 
   linters:
     name: Run linters
@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
       - run: pip install tox
       - run: tox
         env:
@@ -45,7 +45,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.12
+      - run: pip install setuptools
       - run: python setup.py sdist
       - uses: actions/upload-artifact@v3
         with:
@@ -59,11 +60,11 @@ jobs:
       matrix:
         os: [ubuntu-22.04, windows-2019, macos-11]
     env:
-      CIBW_SKIP: cp27-win*
+      CIBW_SKIP: cp27-* cp36-* cp37-* pp37-* pp38-*
     steps:
       - uses: actions/checkout@v3
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.3
+        uses: pypa/cibuildwheel@v2.16.5
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
@@ -78,8 +79,9 @@ jobs:
         if: runner.os == 'Linux'
         uses: docker/setup-qemu-action@v2
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.3
+        uses: pypa/cibuildwheel@v2.16.5
         env:
+          CIBW_SKIP: cp27-* cp36-* cp37-* pp37-* pp38-*
           CIBW_ARCHS_LINUX: aarch64
       - uses: actions/upload-artifact@v3
         with:
@@ -98,28 +100,3 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-#           For publishing to Test PyPI, uncomment next two lines:
-#          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-#          repository_url: https://test.pypi.org/legacy/
-
-  publish-docs:
-    name: Publish docs
-    needs: [publish]
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-      - run: pip install -r requirements-doc.txt
-      - run: pip install awscli
-      - run: pip install -e .
-      - run: (cd docs && make clean html)
-      - run: |
-          aws s3 sync docs/_build/html s3://python-dependency-injector-docs --delete
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }} --path "/*" > /dev/null
-          echo "Cache invalidation triggered"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}

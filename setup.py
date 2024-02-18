@@ -36,7 +36,7 @@ if os.environ.get("DEPENDENCY_INJECTOR_DEBUG_MODE") == "1":
     defined_macros["CYTHON_CLINE_IN_TRACEBACK"] = 1
 
 
-setup(name="dependency-injector",
+setup(name="dependency-injector2",
       version=version,
       description="Dependency injection framework for Python",
       long_description=description,
@@ -104,12 +104,7 @@ setup(name="dependency-injector",
           "License :: OSI Approved :: BSD License",
           "Operating System :: OS Independent",
           "Programming Language :: Python",
-          "Programming Language :: Python :: 2",
-          "Programming Language :: Python :: 2.7",
           "Programming Language :: Python :: 3",
-          "Programming Language :: Python :: 3.5",
-          "Programming Language :: Python :: 3.6",
-          "Programming Language :: Python :: 3.7",
           "Programming Language :: Python :: 3.8",
           "Programming Language :: Python :: 3.9",
           "Programming Language :: Python :: 3.10",
